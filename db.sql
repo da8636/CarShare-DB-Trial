@@ -16,7 +16,7 @@ CREATE TABLE Member (
 );
 
 CREATE TABLE Phone (
-	email varchar(50), references Member(email) NOT NULL,
+	email varchar(50) references Member(email) NOT NULL,
 	phone varchar(10) -- Maximum standard *Australian* mobile phone number
 );
 
@@ -26,13 +26,13 @@ CREATE TABLE Car (
 	model varchar(30) references CarModel(model) NOT NULL,
 	year integer,
 	transmission varchar(50),
-	parkedAt integer(50) references CarBay(name) NOT NULL
+	parkedAt integer references CarBay(name) NOT NULL
 );
 
 CREATE TABLE CarModel (
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
-	name varchar(50)
+	name varchar(50),
 	capacity integer,
 	category varchar(50),
 	primary key (make, model)
@@ -102,5 +102,3 @@ CREATE TABLE CreditCard (
 	expires date,
 	num integer
 );
-
-
