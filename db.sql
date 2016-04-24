@@ -13,7 +13,7 @@ CREATE TABLE CarBay (
 	latitude real,
 	longitude real,
 	CONSTRAINT latitude_check CHECK( latitude between -90 and 90),
-	CONSTRAINT logitude_check CHECK( longitutde between -180 and 180)
+	CONSTRAINT logitude_check CHECK( longitude between -180 and 180)
 );
 
 CREATE TABLE MembershipPlan (
@@ -27,22 +27,23 @@ CREATE TABLE MembershipPlan (
 );
 
 CREATE TABLE Member (
-	email citext PRIMARY KEY, -- emails are case insensitive 
+	email varchar(50) PRIMARY KEY, -- emails are case insensitive TODO: Trigger to bring it to lowercase and check if it exists already.
 	title varchar(4),
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
-	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members 
+	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members TODO: See email
 	password text, -- hashed passwords can get very long
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. Need a license number to verify the member.
- 	license_expiry date NOT NULL,
+ 	license_expiry date NOT NULL, -- TODO: Add trigger to check if license expired on the date of join.
  	address varchar(50),
  	fav_bay_name varchar(50) references CarBay(name),
  	birthdate date,
  	membership_plan varchar(50) references MembershipPlan(name) NOT NULL, 
  	member_since date,
 	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'), 
-	CONSTRAINT title_check CHECK(title in ('Mr','Ms','Mrs','Miss','Mx','Mstr','Dr','Prof'))
-	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %') -- nicknames can't contain spaces. 
+	CONSTRAINT title_check CHECK(title in ('Mr','Ms','Mrs','Miss','Mx','Mstr','Dr','Prof')),
+	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %'), -- nicknames can't contain spaces. 
+	CONSTRAINT birthdate_check CHECK(EXTRACT(YEAR FROM birthdate) >= 1900) -- Nobody is alive that's that old
 );
 
 CREATE TABLE Phone (
@@ -77,13 +78,15 @@ CREATE TABLE Booking (
 	duration integer, -- limiting to hourly bookings
 	whenBooked timestamp, 
 	bookedBy varchar(50) references Member(email) NOT NULL,
-	PRIMARY KEY (regno, startDate, startHour)
+	PRIMARY KEY (regno, startDate, startHour),
+	CONSTRAINT start_hour_check CHECK(start_hour between 0 and 23)
 );
 
 CREATE TABLE PaymentMethod (
 	paymentNum integer,
 	email varchar(50) references Member(email),
 	PRIMARY KEY (paymentNum, email)
+	-- TODO: Add trigger for no more than 3 payment methods per email.
 );
 
 ALTER TABLE Member ADD COLUMN preferred_payment integer references PaymentMethod(paymentNum) NOT NULL;
