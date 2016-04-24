@@ -1,5 +1,3 @@
-
-
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
@@ -72,7 +70,7 @@ CREATE TABLE Car (
 	transmission varchar(50), -- Automatic/Manual
 	parkedAt varchar(50) references CarBay(name) NOT NULL,
 	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'),
-	CONSTRAINT transmission CHECK(lower(transmission) in ('automatic', 'manual'))
+	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
 
 CREATE TABLE Booking (
@@ -154,14 +152,14 @@ CREATE FUNCTION nicknameExists() RETURNS trigger AS
 $$
 BEGIN
 	RAISE EXCEPTION 'This nickname already exists';
-END
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION lowerNickname() RETURNS trigger AS
 $$
 BEGIN
 	UPDATE Member M set M.nickname=lower(M.nickname) where lower(M.nickname)=lower(NEW.nickname);
-END
+END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
