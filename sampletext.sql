@@ -1,8 +1,6 @@
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 
-
-
 INSERT INTO Location (name, type)
 VALUES
 	('Curtin District', 'Magically Hidden'),
@@ -15,10 +13,10 @@ INSERT INTO CarBay (name, address, description, location, latitude, longitude)
 VALUES
 	('Leaky Cauldron', '24 Modly Place, Crace, ACT, Australia', 'Magically Hidden. Can not be see by muggles', 1, 24, 145),
 	('Three Broomsticks', '151 Jamuna Avenue, Curtin, ACT, Australia', 'Parking Lot. Beware of muggles', 2, 44, 92),
-	('Hogwarts', '934 Train Station, Yarralumla, ACT, Australia', 'Portal Allocation found on platform 9 3/4', 3, 1, 12),
-	('Ministry of Magic', '222 Public Toilet, Yarralumla, ACT, Austrlia', 'Portal Allocation found behind the public toilet', 4, 2, 10),
-	('Diagon Alley', '112 Northbourne Avenue, Deakin, ACT, Australia', 'Singular Spaces, slim fit. Tight fit, limited parking. Very Popular', 5, -49, -120),
-	('Hogsmeade', '2 Melbourne Street, Woden, ACT Australia', 'Parking Lot. Space worthy near other parking lots. Beware of muggles', 6, 33, 100);
+	('Hogwarts', '934 Train Station, Yarralumla, ACT, Australia', 'Portal Allocation found on platform 9 3/4', 2, 1, 12),
+	('Ministry of Magic', '222 Public Toilet, Yarralumla, ACT, Austrlia', 'Portal Allocation found behind the public toilet', 3, 2, 10),
+	('Diagon Alley', '112 Northbourne Avenue, Deakin, ACT, Australia', 'Singular Spaces, slim fit. Tight fit, limited parking. Very Popular', 4, -49, -120),
+	('Hogsmeade', '2 Melbourne Street, Woden, ACT Australia', 'Parking Lot. Space worthy near other parking lots. Beware of muggles', 5, 33, 100);
 
 INSERT INTO MembershipPlan
 VALUES ('Platinum', '$50', '$20', '$1.50', '$60', '$5', '$150');
@@ -29,14 +27,17 @@ VALUES
 	('Silver', '$20', '$40', '$3', '$85', '$8', '$50'),
 	('Bronze', '$10', '$50', '$4.5', '$95', '$8.50', '$35');
 
-
-
-INSERT INTO Member
-VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead', 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993');
 INSERT INTO PaymentMethod (email)
 VALUES ('lightingbolt@gmail.com');
 
+INSERT INTO PaymentMethod (email)
+VALUES
+	('muggleborn@outlook.com'),
+	('twinkle@hotmail.com'),
+	('dragon@iprimus.com');
 
+INSERT INTO Member
+VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead', 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993');
 
 
 INSERT INTO Member (email, title, family_name, given_name, nickname, password, license, license_expiry, address, fav_bay_name, birthdate, membership_plan, member_since)
@@ -44,12 +45,6 @@ VALUES
 	('twinkle@hotmail.com', 'Mx', 'Albus', 'Dumbledore', 'Dumbly-dorr', 'I open at the close', 456, '4 July 2016', '5A Dawson Street, Yarralumla, ACT, Australia', 'Hogwarts', '1 Feb 1950', 'Platinum', '2 Dec 1960'),
 	('muggleborn@outlook.com', 'Mrs', 'Hermione', 'Granger-Malfoy', 'Bookworm', 'Dramione', 444, '12/17/2016', '2 Philip Place, Curtin, ACT', 'Three Broomsticks', '19 Sept 1980', 'Silver', '2 Dec 1993'),
 	('dragon@iprimus.com', 'Mr', 'Draco', 'Malfoy', 'Ferret', 'Redeemed', 888, '10/2/2016', '2 Philip Place, Curtin, ACT', 'Hogsmeade', '5 June 1980', 'Platinum', '2 Dec 1993');
-INSERT INTO PaymentMethod (email)
-VALUES
-	('muggleborn@outlook.com'),
-	('twinkle@hotmail.com'),
-	('dragon@iprimus.com');
-
 
 
 INSERT INTO Phone (email, phone)
