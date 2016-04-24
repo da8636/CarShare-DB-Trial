@@ -134,7 +134,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION checkEmailExists() RETURNS boolean AS
 $$
 BEGIN
-	RETURN (SELECT COUNT(M.email)
+	RETURN ((SELECT COUNT(M.email)
 			FROM Member M
 			WHERE M.email = lower(NEW.email))
 			= 1);
@@ -172,7 +172,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION checkNicknameExists() RETURNS boolean AS
 $$
 BEGIN
-	RETURN (SELECT COUNT(M.nickname)
+	RETURN ((SELECT COUNT(M.nickname)
 			FROM Member M
 			WHERE M.nickname = lower(NEW.nickname))
 			= 1);
@@ -182,11 +182,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-	WHEN 
-		((SELECT COUNT(M.nickname)
-		FROM Member M
-		WHERE M.nickname = lower(NEW.nickname))
-		= 1)
+	WHEN (checkNicknameExists())
 	EXECUTE PROCEDURE nicknameExists();
 
 CREATE TRIGGER LOWER_NICKNAME
