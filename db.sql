@@ -220,17 +220,17 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION countPaymentNums() RETURNS integer AS
+CREATE FUNCTION countPaymentNums(e varchar(50)) RETURNS integer AS
 $$
 BEGIN
-	RETURN (SELECT COUNT(P.paymentNum) FROM PaymentMethod P where P.email=NEW.email);
+	RETURN (SELECT COUNT(P.paymentNum) FROM PaymentMethod P where P.email=e);
 END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER MAX_PAYMENT_METHODS_CHECK
 	BEFORE INSERT ON PaymentMethod
 	FOR EACH ROW
-	WHEN (countPaymentNums() > 3)
+	WHEN (countPaymentNums(NEW.email) > 3)
 	EXECUTE PROCEDURE tooManyPaymentMethods();
 
 -- END PAYMENT NUMBER TRIGGERS
