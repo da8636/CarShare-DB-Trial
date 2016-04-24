@@ -27,7 +27,7 @@ CREATE TABLE MembershipPlan (
 );
 
 CREATE TABLE Member (
-	email citext PRIMARY KEY, -- emails 
+	email citext PRIMARY KEY, -- emails are case insensitive 
 	title varchar(4),
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
@@ -54,7 +54,6 @@ CREATE TABLE Phone (
 CREATE TABLE CarModel (
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
-	name varchar(50) UNIQUE, -- Cars should be uniquely identifiable by their names 
 	capacity integer,
 	category varchar(50),
 	PRIMARY KEY (make, model)
@@ -64,6 +63,7 @@ CREATE TABLE Car (
 	regno char(6) PRIMARY KEY,
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
+	name varchar(50) UNIQUE NOT NULL, -- Cars should be uniquely identifiable by their names 
 	FOREIGN KEY (make, model) references CarModel(make, model),
 	year integer,
 	transmission varchar(50),
