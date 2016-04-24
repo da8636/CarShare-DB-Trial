@@ -34,7 +34,7 @@ CREATE TABLE Member (
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
 	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members 
-	password text, -- hashed passwords can get very long
+	password text NOT NULL, -- hashed passwords can get very long
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. Need a license number to verify the member.
  	license_expiry date NOT NULL,
  	address varchar(50),
@@ -223,7 +223,7 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION countPaymentNums() RETURNS integer AS
 $$
 BEGIN
-	RETURN (SELECT COUNT(P.paymentNum) FROM PaymentMethod where P.email=NEW.email);
+	RETURN (SELECT COUNT(P.paymentNum) FROM PaymentMethod P where P.email=NEW.email);
 END
 $$ LANGUAGE plpgsql;
 
