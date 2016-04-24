@@ -131,20 +131,19 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION checkEmailExists() RETURNS boolean AS
+CREATE FUNCTION checkEmailExists(e varchar(50)) RETURNS integer AS
 $$
 BEGIN
 	RETURN (SELECT COUNT(M.email)
 			FROM Member M
-			WHERE M.email = lower(NEW.email))
-			= 1);
+			WHERE M.email = lower(e));
 END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-	WHEN (checkEmailExists())
+	WHEN (checkEmailExists(NEW.email) = 1)
 	EXECUTE PROCEDURE emailExists();
 
 CREATE TRIGGER LOWER_EMAILS
@@ -169,24 +168,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION checkNicknameExists() RETURNS boolean AS
+CREATE FUNCTION checkNicknameExists(n varchar(50)) RETURNS integer AS
 $$
 BEGIN
 	RETURN (SELECT COUNT(M.nickname)
 			FROM Member M
-			WHERE M.nickname = lower(NEW.nickname))
-			= 1);
+			WHERE M.nickname = lower(n));
 END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-	WHEN 
-		((SELECT COUNT(M.nickname)
-		FROM Member M
-		WHERE M.nickname = lower(NEW.nickname))
-		= 1)
+	WHEN (checkNicknameExists(NEW.nickname) = 1)
 	EXECUTE PROCEDURE nicknameExists();
 
 CREATE TRIGGER LOWER_NICKNAME
@@ -204,17 +198,17 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION licenseExpiredCheck() RETURNS boolean AS
+CREATE FUNCTION licenseExpiredCheck(expiry date) RETURNS boolean AS
 $$
 BEGIN
-	RETURN NEW.license_expiry < CURRENT_DATE;
+	RETURN expiry < CURRENT_DATE;
 END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER LICENSE_EXPIRED_ON_JOIN
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-		WHEN (licenseExpiredCheck())
+		WHEN (licenseExpiredCheck(NEW.license_expiry))
 		EXECUTE PROCEDURE licenseExpired();
 
 -- END LICENSE TRIGGER
