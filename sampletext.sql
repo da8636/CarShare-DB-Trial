@@ -32,6 +32,7 @@ INSERT INTO PaymentMethod (email)
 VALUES ('lightingbolt@gmail.com');
 COMMIT;
 
+
 BEGIN;
 INSERT INTO Member (email, title, family_name, given_name, nickname, password, license, license_expiry, address, fav_bay_name, birthdate, membership_plan, member_since)
 VALUES
