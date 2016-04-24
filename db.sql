@@ -67,6 +67,7 @@ CREATE TABLE Car (
 CREATE TABLE Booking (
 	regno char(6) references Car(regno) NOT NULL,
 	startDate date NOT NULL,
+	startHour integer NOT NULL,
 	duration integer, -- limiting to hourly bookings
 	whenBooked timestamp, 
 	bookedBy varchar(50) references Member(email) NOT NULL,
@@ -90,7 +91,8 @@ CREATE TABLE BankAccount (
 	name varchar(30),
 	-- constraint of 3 digits space 3 digits for bsb --
 	bsb char(7),
-	account integer UNIQUE -- The same bank account should not be used by multiple people. Assuming they don't start with a zero.
+	account integer UNIQUE, -- The same bank account should not be used by multiple people. Assuming they don't start with a zero.
+	CONSTRAINT bsb_check CHECK (bsb LIKE '[0-9][0-9][0-9]-[0-9][0-9][0-9]')
 );
 
 CREATE TABLE CreditCard (
