@@ -1,6 +1,6 @@
 INSERT INTO Location (name, type)
 VALUES
-	('Curtin District', 'Magically Hidden')
+	('Curtin District', 'Magically Hidden'),
 	('Crace District', 'Parking Lot'),
 	('Yarralumla District', 'Portal Allocation'),
 	('Deakin District', 'Singular Spaces'),
@@ -25,7 +25,7 @@ VALUES
 	('Bronze', '$10', '$50', '$4.5', '$95', '$8.50', '$35');
 
 INSERT INTO Member
-VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead' 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993');
+VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead', 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993');
 
 INSERT INTO Member (email, title, family_name, given_name, nickname, password, license, license_expiry, address, fav_bay_name, birthdate, membership_plan, member_since)
 VALUES
@@ -49,7 +49,7 @@ VALUES
 INSERT INTO CarModel (make, model, capacity, category)
 VALUES
 	('Toyota', 'Camry', 5, 'Sedan'),
-	('Nissan', 'Dualis', 5 'SUV'),
+	('Nissan', 'Dualis', 5, 'SUV'),
 	('Nimbus', '2000', 2, 'Racing Broomstick'),
 	('Nimbus', 'Firebolt', 2, 'Racing Broomstick');
 
