@@ -1,82 +1,4 @@
--- EMAIL TRIGGERS
-CREATE FUNCTION emailExists() RETURNS trigger AS 
-$$
-BEGIN
-	RAISE EXCEPTION 'This email already exists';
-END
-$$ LANGUAGE plpgsql;
 
-CREATE FUNCTION lowerEmail() RETURNS trigger AS
-$$
-BEGIN
-UPDATE Member M set M.email=lower(M.email) where lower(M.email)=lower(NEW.email)
-END
-$$
-
-CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
-	BEFORE INSERT ON Member
-	FOR EACH ROW
-	WHEN 
-		(SELECT COUNT(M.email)
-		FROM Member M
-		WHERE M.email = lower(NEW.email))
-		= 1
-	EXECUTE PROCEDURE emailExists();
-
-CREATE TRIGGER LOWER_EMAILS
-	AFTER INSERT ON Member
-	FOR EACH ROW
-	EXECUTE PROCEDURE lowerEmail();
-
---END EMAIL TRIGGERS
---NICKNAME TRIGGERS
-
-CREATE FUNCTION nicknameExists() RETURNS trigger AS 
-$$
-BEGIN
-	RAISE EXCEPTION 'This nickname already exists';
-END
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION lowerNickname() RETURNS trigger AS
-$$
-BEGIN
-	UPDATE Member M set M.nickname=lower(M.nickname) where lower(M.nickname)=lower(NEW.nickname)
-END
-$$
-
-CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
-	BEFORE INSERT ON Member
-	FOR EACH ROW
-	WHEN 
-		(SELECT COUNT(M.nickname)
-		FROM Member M
-		WHERE M.nickname = lower(NEW.nickname))
-		= 1
-	EXECUTE PROCEDURE nicknameExists();
-
-CREATE TRIGGER LOWER_NICKNAME
-	AFTER INSERT ON Member
-	FOR EACH ROW
-	EXECUTE PROCEDURE lowerNickname();
-
--- END NICKNAME TRIGGERS
--- LICENSE TRIGGERS
-
-CREATE FUNCTION licenseExpired() RETURNS trigger AS
-$$
-BEGIN
-	RAISE EXCEPTION 'This license has expired';
-END
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER LICENSE_EXPIRED_ONJOIN
-	BEFORE INSERT ON Member
-	FOR EACH ROW
-		WHEN (SELECT NEW.license_expiry) < CURRENT_DATE
-		EXECUTE PROCEDURE licenseExpired();
-
--- END LICENSE TRIGGER
 
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
@@ -149,8 +71,8 @@ CREATE TABLE Car (
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
 	parkedAt varchar(50) references CarBay(name) NOT NULL,
-	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}')
-	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
+	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'),
+	CONSTRAINT transmission CHECK(lower(transmission) in ('automatic', 'manual'))
 );
 
 CREATE TABLE Booking (
@@ -161,11 +83,11 @@ CREATE TABLE Booking (
 	whenBooked timestamp, 
 	bookedBy varchar(50) references Member(email) NOT NULL,
 	PRIMARY KEY (regno, startDate, startHour),
-	CONSTRAINT start_hour_check CHECK(start_hour between 0 and 23)
+	CONSTRAINT startHour_check CHECK(startHour between 0 and 23)
 );
 
 CREATE TABLE PaymentMethod (
-	paymentNum serial,
+	paymentNum serial UNIQUE,
 	email varchar(50) references Member(email),
 	PRIMARY KEY (paymentNum, email)
 	-- TODO: Add trigger for no more than 3 payment methods per email.
@@ -194,3 +116,112 @@ CREATE TABLE CreditCard (
 	expires date,
 	num integer UNIQUE -- The same credit card should not be used by multiple people.
 );
+
+-- EMAIL TRIGGERS
+CREATE FUNCTION emailExists() RETURNS trigger AS 
+$$
+BEGIN
+	RAISE EXCEPTION 'This email already exists';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION lowerEmail() RETURNS trigger AS
+$$
+BEGIN
+	UPDATE Member M set M.email=lower(M.email) where lower(M.email)=lower(NEW.email);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+	WHEN 
+		((SELECT COUNT(M.email)
+		FROM Member M
+		WHERE M.email = lower(NEW.email))
+		= 1)
+	EXECUTE PROCEDURE emailExists();
+
+CREATE TRIGGER LOWER_EMAILS
+	AFTER INSERT ON Member
+	FOR EACH ROW
+	EXECUTE PROCEDURE lowerEmail();
+
+--END EMAIL TRIGGERS
+--NICKNAME TRIGGERS
+
+CREATE FUNCTION nicknameExists() RETURNS trigger AS 
+$$
+BEGIN
+	RAISE EXCEPTION 'This nickname already exists';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION lowerNickname() RETURNS trigger AS
+$$
+BEGIN
+	UPDATE Member M set M.nickname=lower(M.nickname) where lower(M.nickname)=lower(NEW.nickname);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+	WHEN 
+		((SELECT COUNT(M.nickname)
+		FROM Member M
+		WHERE M.nickname = lower(NEW.nickname))
+		= 1)
+	EXECUTE PROCEDURE nicknameExists();
+
+CREATE TRIGGER LOWER_NICKNAME
+	AFTER INSERT ON Member
+	FOR EACH ROW
+	EXECUTE PROCEDURE lowerNickname();
+
+-- END NICKNAME TRIGGERS
+-- LICENSE TRIGGERS
+
+CREATE FUNCTION licenseExpired() RETURNS trigger AS
+$$
+BEGIN
+	RAISE EXCEPTION 'This license has expired';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION licenseExpiredCheck() RETURNS boolean AS
+$$
+BEGIN
+	RETURN NEW.license_expiry < CURRENT_DATE;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER LICENSE_EXPIRED_ON_JOIN
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+		WHEN licenseExpiredCheck()
+		EXECUTE PROCEDURE licenseExpired();
+
+-- END LICENSE TRIGGER
+-- PAYMENT NUMBER TRIGGERS
+CREATE FUNCTION tooManyPaymentMethods() RETURNS trigger AS
+$$
+BEGIN
+	RAISE EXCEPTION 'You already have 3 payment methods';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION countPaymentNums() RETURNS integer AS
+$$
+BEGIN
+	RETURN (SELECT COUNT(P.paymentNum) FROM PaymentMethod where P.email=NEW.email);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER MAX_PAYMENT_METHODS_CHECK
+	BEFORE INSERT ON PaymentMethod
+	FOR EACH ROW
+	WHEN (countPaymentNums() > 3)
+	EXECUTE PROCEDURE tooManyPaymentMethods();
+
+-- END PAYMENT NUMBER TRIGGERS
