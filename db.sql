@@ -1,5 +1,85 @@
+-- EMAIL TRIGGERS
+CREATE FUNCTION emailExists() RETURNS trigger AS 
+$$
+BEGIN
+	RAISE EXCEPTION 'This email already exists';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION lowerEmail() RETURNS trigger AS
+$$
+BEGIN
+UPDATE Member M set M.email=lower(M.email) where lower(M.email)=lower(NEW.email)
+END
+$$
+
+CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+	WHEN 
+		(SELECT COUNT(M.email)
+		FROM Member M
+		WHERE M.email = lower(NEW.email))
+		= 1
+	EXECUTE PROCEDURE emailExists();
+
+CREATE TRIGGER LOWER_EMAILS
+	AFTER INSERT ON Member
+	FOR EACH ROW
+	EXECUTE PROCEDURE lowerEmail();
+
+--END EMAIL TRIGGERS
+--NICKNAME TRIGGERS
+
+CREATE FUNCTION nicknameExists() RETURNS trigger AS 
+$$
+BEGIN
+	RAISE EXCEPTION 'This nickname already exists';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION lowerNickname() RETURNS trigger AS
+$$
+BEGIN
+	UPDATE Member M set M.nickname=lower(M.nickname) where lower(M.nickname)=lower(NEW.nickname)
+END
+$$
+
+CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+	WHEN 
+		(SELECT COUNT(M.nickname)
+		FROM Member M
+		WHERE M.nickname = lower(NEW.nickname))
+		= 1
+	EXECUTE PROCEDURE nicknameExists();
+
+CREATE TRIGGER LOWER_NICKNAME
+	AFTER INSERT ON Member
+	FOR EACH ROW
+	EXECUTE PROCEDURE lowerNickname();
+
+-- END NICKNAME TRIGGERS
+-- LICENSE TRIGGERS
+
+CREATE FUNCTION licenseExpired() RETURNS trigger AS
+$$
+BEGIN
+	RAISE EXCEPTION 'This license has expired';
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER LICENSE_EXPIRED_ONJOIN
+	BEFORE INSERT ON Member
+	FOR EACH ROW
+		WHEN (SELECT NEW.license_expiry) < CURRENT_DATE
+		EXECUTE PROCEDURE licenseExpired();
+
+-- END LICENSE TRIGGER
+
 CREATE TABLE Location (
-	id integer PRIMARY KEY,
+	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
 	type varchar(50),
 	partOf integer references Location(id)
@@ -27,14 +107,14 @@ CREATE TABLE MembershipPlan (
 );
 
 CREATE TABLE Member (
-	email varchar(50) PRIMARY KEY, -- emails are case insensitive TODO: Trigger to bring it to lowercase and check if it exists already.
+	email varchar(50) PRIMARY KEY, -- emails are case insensitive 
 	title varchar(4),
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
-	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members TODO: See email
+	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members 
 	password text, -- hashed passwords can get very long
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. Need a license number to verify the member.
- 	license_expiry date NOT NULL, -- TODO: Add trigger to check if license expired on the date of join.
+ 	license_expiry date NOT NULL,
  	address varchar(50),
  	fav_bay_name varchar(50) references CarBay(name),
  	birthdate date,
@@ -67,8 +147,10 @@ CREATE TABLE Car (
 	name varchar(50) UNIQUE NOT NULL, -- Cars should be uniquely identifiable by their names 
 	FOREIGN KEY (make, model) references CarModel(make, model),
 	year integer,
-	transmission varchar(50),
+	transmission varchar(50), -- Automatic/Manual
 	parkedAt varchar(50) references CarBay(name) NOT NULL,
+	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}')
+	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
 
 CREATE TABLE Booking (
@@ -83,7 +165,7 @@ CREATE TABLE Booking (
 );
 
 CREATE TABLE PaymentMethod (
-	paymentNum integer,
+	paymentNum serial,
 	email varchar(50) references Member(email),
 	PRIMARY KEY (paymentNum, email)
 	-- TODO: Add trigger for no more than 3 payment methods per email.
