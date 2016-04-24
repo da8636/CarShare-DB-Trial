@@ -1,3 +1,5 @@
+-- TODO: ADD ASSERTION!!!!
+
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
@@ -88,7 +90,6 @@ CREATE TABLE PaymentMethod (
 	paymentNum serial UNIQUE,
 	email varchar(50) references Member(email),
 	PRIMARY KEY (paymentNum, email)
-	-- TODO: Add trigger for no more than 3 payment methods per email.
 );
 
 ALTER TABLE Member ADD COLUMN preferred_payment integer references PaymentMethod(paymentNum) NOT NULL;
