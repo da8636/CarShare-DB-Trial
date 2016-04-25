@@ -36,7 +36,8 @@ CREATE TABLE Member (
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. A license number is needed to verify the member
  	license_expiry date NOT NULL,
  	address varchar(50),
- 	fav_bay_name varchar(50) REFERENCES CarBay(name),
+ 	fav_bay_name varchar(50),
+ 	FOREIGN KEY (fav_bay_name) REFERENCES CarBay(name) ON UPDATE CASCADE,
  	birthdate date,
  	membership_plan varchar(50) REFERENCES MembershipPlan(name) NOT NULL,
  	member_since date,
@@ -69,7 +70,8 @@ CREATE TABLE Car (
 	FOREIGN KEY (make, model) REFERENCES CarModel(make, model),
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
-	parkedAt varchar(50) REFERENCES CarBay(name) NOT NULL,
+	parkedAt varchar(50) NOT NULL,
+	FOREIGN KEY (parkedAt) REFERENCES CarBay(name)  ON UPDATE CASCADE,
 	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'), -- Checks that the registration number is in a valid format
 	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
