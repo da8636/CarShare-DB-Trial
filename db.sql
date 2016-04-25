@@ -118,18 +118,11 @@ CREATE TABLE CreditCard (
 );
 
 -- EMAIL TRIGGERS
-CREATE FUNCTION checkDuplicateMembers() RETURNS trigger AS 
+CREATE FUNCTION standardizeMember() RETURNS trigger AS 
 $$
 BEGIN
 	NEW.email := lower(NEW.email);
-	IF (NEW.email in (SELECT email from Member)) THEN
-		RAISE EXCEPTION 'This email already exists';  
-	END IF;
-
 	NEW.nickname := lower(NEW.nickname);
-	IF (NEW.nickname in (SELECT nickname from Member)) THEN
-		RAISE EXCEPTION 'This nickname already exists';
-	END IF;
 	RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
@@ -137,7 +130,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-	EXECUTE PROCEDURE checkDuplicateMembers();
+	EXECUTE PROCEDURE standardizeMember();
 -- LICENSE TRIGGERS
 
 CREATE FUNCTION licenseExpired() RETURNS trigger AS
