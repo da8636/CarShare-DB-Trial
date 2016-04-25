@@ -184,14 +184,12 @@ CREATE TRIGGER MAX_PAYMENT_METHODS_CHECK
 CREATE ASSERTION carToBaySurjection CHECK
 (
 	NOT EXISTS
-	(
-		SELECT(B.name) FROM CarBay B
-		WHERE NOT EXISTS
 		(
-			SELECT(C.parkedAt) FROM Car C
-			WHERE C.parkedAt = B.name
+			SELECT(B.name)
+			FROM CarBay B LEFT JOIN Car C
+			ON B.name = C.parkedAt
+			WHERE C.parkedAt IS NULL
 		)
 	)
-)
 */
 -- END CARBAY ASSERTIONS

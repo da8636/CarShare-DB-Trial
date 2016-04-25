@@ -1,4 +1,4 @@
-
+-- NOTE: Hodsmeade would violate the assertion carToBaySurjection if it were to be implemented as no cars have been assigned that bay
 
 INSERT INTO Location (name, type)
 VALUES
