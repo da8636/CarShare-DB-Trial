@@ -81,5 +81,5 @@ INSERT INTO Booking (regno, startDate, startHour, duration, whenBooked, bookedBy
 VALUES
 	('YBK9OC', '2/08/2016', 15, 4, CURRENT_TIMESTAMP, 'muggleborn@outlook.com'),
 	('2TOO22', '12/07/2016', 9, 12, CURRENT_TIMESTAMP, 'twinkle@hotmail.com'),
-	('5FIVE5', '2/08/2016', 18, 2, CURRENT_TIMESTAMP, 'dragon@gmail.com'),
+	('5FIVE5', '2/08/2016', 18, 2, CURRENT_TIMESTAMP, 'dragon@iprimus.com'),
 	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'lightingbolt@gmail.com');
