@@ -1,4 +1,5 @@
--- TODO: ADD ASSERTION!!!!
+-- TODO: ADD ASSERTION!!!! CHECK that a carbay is assigned to at least one car. That the count of CarBays are equal to the Count of Car(ParkedAt).
+
 
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
@@ -12,8 +13,8 @@ CREATE TABLE CarBay (
 	address text,
 	description text,
 	location integer references Location(id) NOT NULL,
-	latitude real,
-	longitude real,
+	latitude decimal,
+	longitude decimal,
 	CONSTRAINT latitude_check CHECK( latitude between -90 and 90),
 	CONSTRAINT logitude_check CHECK( longitude between -180 and 180)
 );
@@ -29,28 +30,28 @@ CREATE TABLE MembershipPlan (
 );
 
 CREATE TABLE Member (
-	email varchar(50) PRIMARY KEY, -- emails are case insensitive 
+	email varchar(50) PRIMARY KEY, -- emails are case insensitive
 	title varchar(4),
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
-	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members 
+	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members
 	password text NOT NULL, -- hashed passwords can get very long
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. Need a license number to verify the member.
  	license_expiry date NOT NULL,
  	address varchar(50),
  	fav_bay_name varchar(50) references CarBay(name),
  	birthdate date,
- 	membership_plan varchar(50) references MembershipPlan(name) NOT NULL, 
+ 	membership_plan varchar(50) references MembershipPlan(name) NOT NULL,
  	member_since date,
-	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'), 
+	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'),
 	CONSTRAINT title_check CHECK(title in ('Mr','Ms','Mrs','Miss','Mx','Mstr','Dr','Prof')),
-	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %'), -- nicknames can't contain spaces. 
+	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %'), -- nicknames can't contain spaces.
 	CONSTRAINT birthdate_check CHECK(EXTRACT(YEAR FROM birthdate) >= 1900) -- Nobody is alive that's that old
 );
 
 CREATE TABLE Phone (
 	email varchar(50) references Member(email) NOT NULL, -- Not a primary key because we need multiple entries, one per phone number
-	phone varchar(10) UNIQUE -- 10 numbers is the stanard *Australian* mobile number, we assume mobile numbers because home phones are shared. UNIQUE prevents duplication.  
+	phone varchar(10) UNIQUE NOT NULL -- 10 numbers is the stanard *Australian* mobile number, we assume mobile numbers because home phones are shared. UNIQUE prevents duplication.
 	CONSTRAINT phone_check CHECK(phone ~ '[0-9]{10}')
 );
 
@@ -66,7 +67,7 @@ CREATE TABLE Car (
 	regno char(6) PRIMARY KEY,
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
-	name varchar(50) UNIQUE NOT NULL, -- Cars should be uniquely identifiable by their names 
+	name varchar(50) UNIQUE NOT NULL, -- Cars should be uniquely identifiable by their names
 	FOREIGN KEY (make, model) references CarModel(make, model),
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
@@ -80,7 +81,7 @@ CREATE TABLE Booking (
 	startDate date NOT NULL,
 	startHour integer NOT NULL,
 	duration integer, -- limiting to hourly bookings
-	whenBooked timestamp, 
+	whenBooked timestamp,
 	bookedBy varchar(50) references Member(email) NOT NULL,
 	PRIMARY KEY (regno, startDate, startHour),
 	CONSTRAINT startHour_check CHECK(startHour between 0 and 23)
@@ -97,15 +98,15 @@ ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_p
 
 CREATE TABLE Paypal (
 	paymentNum integer PRIMARY KEY references PaymentMethod(paymentNum),
-	paypal_email varchar(50) UNIQUE NOT NULL -- Assuming that Paypal emails are personal and are used by one person.
-	CONSTRAINT paypal_check CHECK(paypal_email ~ '[^@]+@[^@]+(\.[^@]+)+') 
+	paypal_email varchar(50) NOT NULL -- Assume that spouse, family or company paypal accounts are shared
+	CONSTRAINT paypal_check CHECK(paypal_email ~ '[^@]+@[^@]+(\.[^@]+)+')
 );
 
 CREATE TABLE BankAccount (
 	paymentNum integer PRIMARY KEY references PaymentMethod(paymentNum),
 	name varchar(30),
 	bsb char(7),
-	account integer UNIQUE, -- The same bank account should not be used by multiple people. Assuming they don't start with a zero.
+	account integer, -- Assume that spouse, family or company bank accounts are shared
 	CONSTRAINT bsb_check CHECK (bsb ~ '[0-9]{3}-[0-9]{3}')
 );
 
@@ -114,16 +115,16 @@ CREATE TABLE CreditCard (
 	name varchar(30),
 	brand varchar(30),
 	expires date,
-	num integer UNIQUE -- The same credit card should not be used by multiple people.
+	num integer -- Assume that spouse, family or company credit cards are shared
 );
 
 -- EMAIL TRIGGERS
-CREATE FUNCTION checkDuplicateMembers() RETURNS trigger AS 
+CREATE FUNCTION checkDuplicateMembers() RETURNS trigger AS
 $$
 BEGIN
 	NEW.email := lower(NEW.email);
 	IF (NEW.email in (SELECT email from Member)) THEN
-		RAISE EXCEPTION 'This email already exists';  
+		RAISE EXCEPTION 'This email already exists';
 	END IF;
 
 	NEW.nickname := lower(NEW.nickname);
