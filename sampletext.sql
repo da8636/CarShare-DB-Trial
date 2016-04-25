@@ -15,7 +15,7 @@ VALUES
 	('Hogwarts', '934 Train Station, Yarralumla, ACT, Australia', 'Portal Allocation found on platform 9 3/4', 2, 1, 12),
 	('Ministry of Magic', '222 Public Toilet, Yarralumla, ACT, Austrlia', 'Portal Allocation found behind the public toilet', 3, 2, 10),
 	('Diagon Alley', '112 Northbourne Avenue, Deakin, ACT, Australia', 'Singular Spaces, slim fit. Tight fit, limited parking. Very Popular', 4, -49, -120),
-	('Hogsmeade', '2 Melbourne Street, Woden, ACT Australia', 'Parking Lot. Space worthy near other parking lots. Beware of muggles', 5, 33, 100);
+	('Hogsmeade', '2 Melbourne Street, Woden, ACT Australia', 'Parking Lot. Space worthy near other parking lots. Beware of muggles', 5, 33.65, 100.21);
 
 INSERT INTO MembershipPlan
 VALUES ('Platinum', '$50', '$20', '$1.50', '$60', '$5', '$150');
@@ -71,8 +71,9 @@ INSERT INTO Car (regno, make, model, name, year, transmission, parkedAt)
 VALUES
 	('YBK9OC', 'Toyota', 'Camry', 'Bumble Bee', 1998, 'Automatic', 'Three Broomsticks'),
 	('2TOO22', 'Nimbus', '2000', 'Nimby', 2000, 'Manual', 'Hogwarts'),
-	('4FOUR4', 'Nimbus', 'Firebolt', 'Snappy', 2003, 'Manual', 'Leaky Cauldron'),
 	--testing multiple car model but different regno--
+	('4FOUR4', 'Nimbus', 'Firebolt', 'Snappy', 2003, 'Manual', 'Leaky Cauldron'),
+	('5FIVE5', 'Nimbus', 'Firebolt', 'Fibby', 2012, 'Manual', 'Hogsmeade'),
 	('3THREE', 'Nissan', 'Dualis', 'Minty', 2011, 'Automatic', 'Diagon Alley'),
 	('YJB96X', 'Nissan', 'Dualis', 'Rampyari', 2012, 'Automatic', 'Ministry of Magic');
 
@@ -80,4 +81,5 @@ INSERT INTO Booking (regno, startDate, startHour, duration, whenBooked, bookedBy
 VALUES
 	('YBK9OC', '2/08/2016', 15, 4, CURRENT_TIMESTAMP, 'muggleborn@outlook.com'),
 	('2TOO22', '12/07/2016', 9, 12, CURRENT_TIMESTAMP, 'twinkle@hotmail.com'),
+	('5FIVE5', '2/08/2016', 18, 2, CURRENT_TIMESTAMP, 'dragon@gmail.com'),
 	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'lightingbolt@gmail.com');
