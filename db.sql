@@ -118,78 +118,26 @@ CREATE TABLE CreditCard (
 );
 
 -- EMAIL TRIGGERS
-CREATE FUNCTION emailExists() RETURNS trigger AS 
+CREATE FUNCTION checkDuplicateMembers() RETURNS trigger AS 
 $$
 BEGIN
-	RAISE EXCEPTION 'This email already exists';
-END
-$$ LANGUAGE plpgsql;
+	NEW.email := lower(NEW.email);
+	IF (NEW.email in (SELECT email from Member)) THEN
+		RAISE EXCEPTION 'This email already exists';  
+	END IF;
 
-CREATE FUNCTION lowerEmail() RETURNS trigger AS
-$$
-BEGIN
-	UPDATE Member M set M.email=lower(M.email) where lower(M.email)=lower(NEW.email);
-END
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION checkEmailExists(e varchar(50)) RETURNS integer AS
-$$
-BEGIN
-	RETURN (SELECT COUNT(M.email)
-			FROM Member M
-			WHERE M.email = lower(e));
+	NEW.nickname := lower(NEW.nickname);
+	IF (NEW.nickname in (SELECT nickname from Member)) THEN
+		RAISE EXCEPTION 'This nickname already exists';
+	END IF;
+	RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
-	WHEN (checkEmailExists(NEW.email) = 1)
-	EXECUTE PROCEDURE emailExists();
-
-CREATE TRIGGER LOWER_EMAILS
-	AFTER INSERT ON Member
-	FOR EACH ROW
-	EXECUTE PROCEDURE lowerEmail();
-
---END EMAIL TRIGGERS
---NICKNAME TRIGGERS
-
-CREATE FUNCTION nicknameExists() RETURNS trigger AS 
-$$
-BEGIN
-	RAISE EXCEPTION 'This nickname already exists';
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION lowerNickname() RETURNS trigger AS
-$$
-BEGIN
-	UPDATE Member M set M.nickname=lower(M.nickname) where lower(M.nickname)=lower(NEW.nickname);
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION checkNicknameExists(n varchar(50)) RETURNS integer AS
-$$
-BEGIN
-	RETURN (SELECT COUNT(M.nickname)
-			FROM Member M
-			WHERE M.nickname = lower(n));
-END
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER DUPLICATE_MEMBER_NICKNAME_CHECK
-	BEFORE INSERT ON Member
-	FOR EACH ROW
-	WHEN (checkNicknameExists(NEW.nickname) = 1)
-	EXECUTE PROCEDURE nicknameExists();
-
-CREATE TRIGGER LOWER_NICKNAME
-	AFTER INSERT ON Member
-	FOR EACH ROW
-	EXECUTE PROCEDURE lowerNickname();
-
--- END NICKNAME TRIGGERS
+	EXECUTE PROCEDURE checkDuplicateMembers();
 -- LICENSE TRIGGERS
 
 CREATE FUNCTION licenseExpired() RETURNS trigger AS

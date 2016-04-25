@@ -29,14 +29,14 @@ VALUES
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Member
-VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead', 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993', 1);
+VALUES('lightingbolt@gmail.com', 'Mr', 'Harry', 'Potter', 'Scarhead', 'Alohomora', 394, '8/9/2016', '13 Digby CCT, Crace, ACT, Australia', 'Leaky Cauldron', '31 July 1980', 'Gold', '31 July 1993');
 
 
 INSERT INTO Member (email, title, family_name, given_name, nickname, password, license, license_expiry, address, fav_bay_name, birthdate, membership_plan, member_since)
 VALUES
-	('twinkle@hotmail.com', 'Mx', 'Albus', 'Dumbledore', 'Dumbly-dorr', 'I open at the close', 456, '4 July 2016', '5A Dawson Street, Yarralumla, ACT, Australia', 'Hogwarts', '1 Feb 1950', 'Platinum', '2 Dec 1960', 3),
-	('muggleborn@outlook.com', 'Mrs', 'Hermione', 'Granger-Malfoy', 'Bookworm', 'Dramione', 444, '12/17/2016', '2 Philip Place, Curtin, ACT', 'Three Broomsticks', '19 Sept 1980', 'Silver', '2 Dec 1993', 2),
-	('dragon@iprimus.com', 'Mr', 'Draco', 'Malfoy', 'Ferret', 'Redeemed', 888, '10/2/2016', '2 Philip Place, Curtin, ACT', 'Hogsmeade', '5 June 1980', 'Platinum', '2 Dec 1993', 4);
+	('twinkle@hotmail.com', 'Mx', 'Albus', 'Dumbledore', 'Dumbly-dorr', 'I open at the close', 456, '4 July 2016', '5A Dawson Street, Yarralumla, ACT, Australia', 'Hogwarts', '1 Feb 1950', 'Platinum', '2 Dec 1960'),
+	('muggleborn@outlook.com', 'Mrs', 'Hermione', 'Granger-Malfoy', 'Bookworm', 'Dramione', 444, '12/12/2016', '2 Philip Place, Curtin, ACT', 'Three Broomsticks', '19 Sept 1980', 'Silver', '2 Dec 1993'),
+	('dragon@iprimus.com', 'Mr', 'Draco', 'Malfoy', 'Ferret', 'Redeemed', 888, '10/12/2016', '2 Philip Place, Curtin, ACT', 'Hogsmeade', '5 June 1980', 'Platinum', '2 Dec 1993');
 
 INSERT INTO PaymentMethod (PaymentNum, email)
 VALUES (1, 'lightingbolt@gmail.com');
@@ -80,4 +80,4 @@ INSERT INTO Booking (regno, startDate, startHour, duration, whenBooked, bookedBy
 VALUES
 	('YBK9OC', '2/08/2016', 15, 4, CURRENT_TIMESTAMP, 'muggleborn@outlook.com'),
 	('2TOO22', '12/07/2016', 9, 12, CURRENT_TIMESTAMP, 'twinkle@hotmail.com'),
-	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'scarhead@gmail.com');
+	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'lightingbolt@gmail.com');
