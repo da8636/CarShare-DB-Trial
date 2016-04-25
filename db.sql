@@ -92,7 +92,8 @@ CREATE TABLE PaymentMethod (
 	PRIMARY KEY (paymentNum, email)
 );
 
-ALTER TABLE Member ADD COLUMN preferred_payment integer references PaymentMethod(paymentNum) NOT NULL;
+ALTER TABLE Member ADD COLUMN preferred_payment integer;
+ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_payment) REFERENCES PaymentMethod(paymentNum) DEFERRABLE;
 
 CREATE TABLE Paypal (
 	paymentNum integer PRIMARY KEY references PaymentMethod(paymentNum),
