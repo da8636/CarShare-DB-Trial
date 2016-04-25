@@ -1,6 +1,3 @@
--- TODO: ADD ASSERTION!!!! CHECK that a carbay is assigned to at least one car. That the count of CarBays are equal to the Count of Car(ParkedAt).
-
-
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
@@ -15,8 +12,8 @@ CREATE TABLE CarBay (
 	location integer references Location(id) NOT NULL,
 	latitude decimal,
 	longitude decimal,
-	CONSTRAINT latitude_check CHECK( latitude between -90 and 90),
-	CONSTRAINT logitude_check CHECK( longitude between -180 and 180)
+	CONSTRAINT latitude_check CHECK(latitude between -90 and 90),
+	CONSTRAINT logitude_check CHECK(longitude between -180 and 180)
 );
 
 CREATE TABLE MembershipPlan (
@@ -30,29 +27,29 @@ CREATE TABLE MembershipPlan (
 );
 
 CREATE TABLE Member (
-	email varchar(50) PRIMARY KEY, -- emails are case insensitive
-	title varchar(4),
+	email varchar(50) PRIMARY KEY, -- Emails are case insensitive
+	title varchar(4), --All titles accepted by the system are at most four characters long
 	family_name varchar(50) NOT NULL, -- People need names, otherwise we can't check their names against their license
 	given_name varchar(50) NOT NULL, -- See above
-	nickname varchar(50) UNIQUE, -- nicknames should uniquely identify members
-	password text NOT NULL, -- hashed passwords can get very long
- 	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. Need a license number to verify the member.
+	nickname varchar(50) UNIQUE, -- Nicknames should uniquely identify members
+	password text NOT NULL, -- The password will only be stored in a hashed format, which can get very long
+ 	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. A license number is needed to verify the member
  	license_expiry date NOT NULL,
  	address varchar(50),
  	fav_bay_name varchar(50) references CarBay(name),
  	birthdate date,
  	membership_plan varchar(50) references MembershipPlan(name) NOT NULL,
  	member_since date,
-	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'),
+	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'), -- It is assumed that a confirmation email will be sent to confirm registration, if they successfully registered, then, their email must be valid. This constraint is simply here to help prevent data entry errors.
 	CONSTRAINT title_check CHECK(title in ('Mr','Ms','Mrs','Miss','Mx','Mstr','Dr','Prof')),
-	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %'), -- nicknames can't contain spaces.
+	CONSTRAINT nickname_check CHECK(nickname NOT LIKE '% %'), -- Nicknames can't contain spaces
 	CONSTRAINT birthdate_check CHECK(EXTRACT(YEAR FROM birthdate) >= 1900) -- Nobody is alive that's that old
 );
 
 CREATE TABLE Phone (
 	email varchar(50) references Member(email) NOT NULL, -- Not a primary key because we need multiple entries, one per phone number
-	phone varchar(10) UNIQUE NOT NULL -- 10 numbers is the stanard *Australian* mobile number, we assume mobile numbers because home phones are shared. UNIQUE prevents duplication.
-	CONSTRAINT phone_check CHECK(phone ~ '[0-9]{10}')
+	phone varchar(10) UNIQUE NOT NULL -- 10 numbers is the stanard *Australian* mobile number, we assume mobile numbers because home phones are shared. UNIQUE prevents duplication. Varchar is used as numerical types doe not preserve leading zeroes
+	CONSTRAINT phone_check CHECK(phone ~ '[0-9]{10}') --Phone numbers must be numeric
 );
 
 CREATE TABLE CarModel (
@@ -72,7 +69,7 @@ CREATE TABLE Car (
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
 	parkedAt varchar(50) references CarBay(name) NOT NULL,
-	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'),
+	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'), -- Checks that the registration number is in a valid format
 	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
 
@@ -80,7 +77,7 @@ CREATE TABLE Booking (
 	regno char(6) references Car(regno) NOT NULL,
 	startDate date NOT NULL,
 	startHour integer NOT NULL,
-	duration integer, -- limiting to hourly bookings
+	duration integer NOT NULL, -- The specifications state that bookings are limited to being in terms of hours
 	whenBooked timestamp,
 	bookedBy varchar(50) references Member(email) NOT NULL,
 	PRIMARY KEY (regno, startDate, startHour),
@@ -94,12 +91,12 @@ CREATE TABLE PaymentMethod (
 );
 
 ALTER TABLE Member ADD COLUMN preferred_payment integer;
-ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_payment) REFERENCES PaymentMethod(paymentNum) DEFERRABLE;
+ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_payment) REFERENCES PaymentMethod(paymentNum) DEFERRABLE; -- Adds a circular reference that is not possible on table creation
 
 CREATE TABLE Paypal (
 	paymentNum integer PRIMARY KEY references PaymentMethod(paymentNum),
 	paypal_email varchar(50) NOT NULL -- Assume that spouse, family or company paypal accounts are shared
-	CONSTRAINT paypal_check CHECK(paypal_email ~ '[^@]+@[^@]+(\.[^@]+)+')
+	CONSTRAINT paypal_check CHECK(paypal_email ~ '[^@]+@[^@]+(\.[^@]+)+')  -- It is assumed that paypal emails will already be checked by an external mechanism. This constraint is simply here to help prevent data entry errors.
 );
 
 CREATE TABLE BankAccount (
@@ -107,18 +104,19 @@ CREATE TABLE BankAccount (
 	name varchar(30),
 	bsb char(7),
 	account integer, -- Assume that spouse, family or company bank accounts are shared
-	CONSTRAINT bsb_check CHECK (bsb ~ '[0-9]{3}-[0-9]{3}')
+	CONSTRAINT bsb_check CHECK (bsb ~ '[0-9]{3}-[0-9]{3}') -- Checks that the bsb number is in a valid format
 );
 
 CREATE TABLE CreditCard (
 	paymentNum integer PRIMARY KEY references PaymentMethod(paymentNum),
 	name varchar(30),
-	brand varchar(30),
-	expires date,
+	brand varchar(30) NOT NULL, -- All credit cards have a brand
+	expires date NOT NULL, -- All credit cards have an expiry date
 	num integer -- Assume that spouse, family or company credit cards are shared
 );
 
 -- EMAIL TRIGGERS
+-- As this converts all emails and nicknames into lowercase, it ensures that other emails and nicknames cannot be the same jsut with differing case thanks to the UNIQUE constraint
 CREATE FUNCTION standardizeMember() RETURNS trigger AS 
 $$
 BEGIN
@@ -132,8 +130,9 @@ CREATE TRIGGER DUPLICATE_MEMBER_EMAIL_CHECK
 	BEFORE INSERT ON Member
 	FOR EACH ROW
 	EXECUTE PROCEDURE standardizeMember();
--- LICENSE TRIGGERS
+-- END EMAIL TRIGGERS
 
+-- LICENSE TRIGGERS
 CREATE FUNCTION licenseExpired() RETURNS trigger AS
 $$
 BEGIN
@@ -148,13 +147,14 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- Ensures that licenses have not expired
 CREATE TRIGGER LICENSE_EXPIRED_ON_JOIN
 	BEFORE INSERT ON Member
 	FOR EACH ROW
 		WHEN (licenseExpiredCheck(NEW.license_expiry))
 		EXECUTE PROCEDURE licenseExpired();
-
 -- END LICENSE TRIGGER
+
 -- PAYMENT NUMBER TRIGGERS
 CREATE FUNCTION tooManyPaymentMethods() RETURNS trigger AS
 $$
@@ -163,6 +163,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- Checks to ensure that no one has more than 3 payment methods
 CREATE FUNCTION countPaymentNums(e varchar(50)) RETURNS integer AS
 $$
 BEGIN
@@ -175,5 +176,22 @@ CREATE TRIGGER MAX_PAYMENT_METHODS_CHECK
 	FOR EACH ROW
 	WHEN (countPaymentNums(NEW.email) > 3)
 	EXECUTE PROCEDURE tooManyPaymentMethods();
-
 -- END PAYMENT NUMBER TRIGGERS
+
+-- CARBAY ASSERTIONS
+--NOTE: This is commented out as PostgresSQL 9.5 does not support assertions yet
+/*
+CREATE ASSERTION carToBaySurjection CHECK
+(
+	NOT EXISTS
+	(
+		SELECT(B.name) FROM CarBay B
+		WHERE NOT EXISTS
+		(
+			SELECT(C.parkedAt) FROM Car C
+			WHERE C.parkedAt = B.name
+		)
+	)
+)
+*/
+-- END CARBAY ASSERTIONS
