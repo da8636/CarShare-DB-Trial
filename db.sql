@@ -2,7 +2,7 @@ CREATE TABLE Location (
 	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
 	type varchar(50),
-	partOf integer REFERENCES Location(id)
+	partOf integer REFERENCES Location(id) ON DELETE SET NULL
 );
 
 CREATE TABLE CarBay (
@@ -36,10 +36,9 @@ CREATE TABLE Member (
  	license integer UNIQUE NOT NULL, -- License numbers should not be duplicated between different members. A license number is needed to verify the member
  	license_expiry date NOT NULL,
  	address varchar(50),
- 	fav_bay_name varchar(50),
- 	FOREIGN KEY (fav_bay_name) REFERENCES CarBay(name) ON UPDATE CASCADE,
+ 	fav_bay_name varchar(50) REFERENCES CarBay(name) ON UPDATE CASCADE ON DELETE SET NULL,
  	birthdate date,
- 	membership_plan varchar(50) REFERENCES MembershipPlan(name) NOT NULL,
+ 	membership_plan varchar(50) REFERENCES MembershipPlan(name) ON UPDATE CASCADE NOT NULL,
  	member_since date,
 	CONSTRAINT email_check CHECK(email ~ '[^@]+@[^@]+(\.[^@]+)+'), -- It is assumed that a confirmation email will be sent to confirm registration, if they successfully registered, then, their email must be valid. This constraint is simply here to help prevent data entry errors.
 	CONSTRAINT title_check CHECK(title in ('Mr','Ms','Mrs','Miss','Mx','Mstr','Dr','Prof')),
@@ -48,8 +47,7 @@ CREATE TABLE Member (
 );
 
 CREATE TABLE Phone (
-	email varchar(50) NOT NULL, -- Not a primary key because we need multiple entries, one per phone number
-	FOREIGN KEY (email) REFERENCES Member(email) ON UPDATE CASCADE,
+	email varchar(50) REFERENCES Member(email) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL, -- Not a primary key because we need multiple entries, one per phone number
 	phone varchar(10) UNIQUE NOT NULL -- 10 numbers is the stanard *Australian* mobile number, we assume mobile numbers because home phones are shared. UNIQUE prevents duplication. Varchar is used as numerical types doe not preserve leading zeroes
 	CONSTRAINT phone_check CHECK(phone ~ '[0-9]{10}') --Phone numbers must be numeric
 );
@@ -67,36 +65,33 @@ CREATE TABLE Car (
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
 	name varchar(50) UNIQUE NOT NULL, -- Cars should be uniquely identifiable by their names
-	FOREIGN KEY (make, model) REFERENCES CarModel(make, model),
+	FOREIGN KEY (make, model) REFERENCES CarModel(make, model) ON UPDATE CASCADE, -- A CarModel should never be deleted when there are still cars using it
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
-	parkedAt varchar(50) NOT NULL,
-	FOREIGN KEY (parkedAt) REFERENCES CarBay(name)  ON UPDATE CASCADE,
+	parkedAt varchar(50) REFERENCES CarBay(name) ON UPDATE CASCADE NOT NULL,
 	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'), -- Checks that the registration number is in a valid format
 	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
 
 CREATE TABLE Booking (
-	regno char(6) REFERENCES Car(regno) NOT NULL,
+	regno char(6) REFERENCES Car(regno) ON UPDATE CASCADE NOT NULL,
 	startDate date NOT NULL,
 	startHour integer NOT NULL,
 	duration integer NOT NULL, -- The specifications state that bookings are limited to being in terms of hours
 	whenBooked timestamp,
-	bookedBy varchar(50) NOT NULL,
-	FOREIGN KEY (bookedBy) REFERENCES Member(email) ON UPDATE CASCADE,
+	bookedBy varchar(50) REFERENCES Member(email) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
 	PRIMARY KEY (regno, startDate, startHour),
 	CONSTRAINT startHour_check CHECK(startHour between 0 and 23)
 );
 
 CREATE TABLE PaymentMethod (
 	paymentNum serial UNIQUE,
-	email varchar(50),
-	FOREIGN KEY (email) REFERENCES Member(email) ON UPDATE CASCADE,
+	email varchar(50) REFERENCES Member(email) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
 	PRIMARY KEY (paymentNum, email)
 );
 
 ALTER TABLE Member ADD COLUMN preferred_payment integer;
-ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_payment) REFERENCES PaymentMethod(paymentNum) DEFERRABLE; -- Adds a circular reference that is not possible on table creation
+ALTER TABLE Member ADD CONSTRAINT prefered_payment_fkey FOREIGN KEY (preferred_payment) REFERENCES PaymentMethod(paymentNum) ON UPDATE CASCADE DEFERRABLE; -- Adds a circular reference that is not possible on table creation
 
 CREATE TABLE Paypal (
 	paymentNum integer PRIMARY KEY REFERENCES PaymentMethod(paymentNum),
