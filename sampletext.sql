@@ -83,3 +83,23 @@ VALUES
 	('2TOO22', '12/07/2016', 9, 12, CURRENT_TIMESTAMP, 'twinkle@hotmail.com'),
 	('5FIVE5', '2/08/2016', 18, 2, CURRENT_TIMESTAMP, 'dragon@iprimus.com'),
 	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'lightingbolt@gmail.com');
+	
+DELETE FROM Booking
+WHERE regno='YBK90C' and startDate='2/08/2016' and startHour=15;
+
+DELETE FROM Car
+WHERE regno='4FOUR4';
+
+BEGIN;
+DELETE FROM PaymentMethod
+WHERE PaymentNum=1;
+
+DELETE FROM Member
+WHERE email='lightingbolt@gmail.com';
+COMMIT;
+
+DELETE FROM CarBay
+WHERE name='Hogwarts';
+
+DELETE FROM Location
+WHERE name='Crace District'
