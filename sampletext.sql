@@ -109,7 +109,7 @@ SET startHour = '10'
 WHERE bookedBy = 'twinkle@hotmail.com';
 
 INSERT INTO PaymentMethod
-VALUES ('5, 'scarhead@hotmail.com'');
+VALUES ('5', 'scarhead@gmail.com');
 
 DELETE FROM Booking
 WHERE regno='YBK90C' and startDate='2/08/2016' and startHour=15;
