@@ -1,14 +1,14 @@
 CREATE TABLE Location (
 	id serial PRIMARY KEY,
 	name varchar(50) UNIQUE, -- Location names should be easily discernable, as such make them unique
-	type varchar(50),
+	type varchar(50) DEFAULT 'Parking Lot',
 	partOf integer REFERENCES Location(id) ON DELETE SET NULL
 );
 
 CREATE TABLE CarBay (
 	name varchar(50) PRIMARY KEY,
 	address text,
-	description text,
+	description text DEFAULT 'A car bay. You can park your booked car here',
 	location integer REFERENCES Location(id) ON DELETE CASCADE NOT NULL, -- If Glebe gets demolished, all car bays in Glebe will not be servicable.
 	latitude decimal,
 	longitude decimal,
@@ -56,7 +56,7 @@ CREATE TABLE CarModel (
 	make varchar(30) NOT NULL,
 	model varchar(30) NOT NULL,
 	capacity integer,
-	category varchar(50),
+	category varchar(50) DEFAULT 'Sedan', -- Most common car category is the Sedan.
 	PRIMARY KEY (make, model)
 );
 
