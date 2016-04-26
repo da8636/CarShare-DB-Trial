@@ -83,7 +83,34 @@ VALUES
 	('2TOO22', '12/07/2016', 9, 12, CURRENT_TIMESTAMP, 'twinkle@hotmail.com'),
 	('5FIVE5', '2/08/2016', 18, 2, CURRENT_TIMESTAMP, 'dragon@iprimus.com'),
 	('4FOUR4', '8/12/2016', 18, 23, CURRENT_TIMESTAMP, 'lightingbolt@gmail.com');
-	
+
+UPDATE Member
+SET fav_bay_name = 'Ministry of Magic'
+WHERE email = 'lightingbolt@gmail.com';
+
+UPDATE Member
+SET email = 'scarhead@gmail.com'
+WHERE email = 'lightingbolt@gmail.com';
+
+UPDATE CarBay
+SET name = 'Knockturn Alley'
+WHERE name = 'Diagon Alley';
+
+UPDATE Car
+SET parkedAt = 'Hogsmeade'
+WHERE regno = '3THREE';
+
+UPDATE Car
+SET regno = '9NINE9'
+WHERE regno = '3THREE';
+
+UPDATE Booking
+SET startHour = '10'
+WHERE bookedBy = 'twinkle@hotmail.com';
+
+INSERT INTO PaymentMethod
+VALUES ('5, 'scarhead@hotmail.com'');
+
 DELETE FROM Booking
 WHERE regno='YBK90C' and startDate='2/08/2016' and startHour=15;
 
