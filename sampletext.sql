@@ -128,7 +128,7 @@ SET bsb = '8637232'
 WHERE paymentNum = 3;
 
 UPDATE CreditCard
-SET expires = 12/12/2016
+SET expires = '12/12/2016'
 WHERE PaymentNum = 2;
 
 DELETE FROM Booking

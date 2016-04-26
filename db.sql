@@ -74,7 +74,7 @@ CREATE TABLE Car (
 );
 
 CREATE TABLE Booking (
-	regno char(6) REFERENCES Car(regno) ON UPDATE CASCADE NOT NULL,
+	regno char(6) REFERENCES Car(regno) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL, -- Bookings with cars that are no longer in use should be removed as they don't make sense.
 	startDate date NOT NULL,
 	startHour integer NOT NULL,
 	duration integer NOT NULL, -- The specifications state that bookings are limited to being in terms of hours
