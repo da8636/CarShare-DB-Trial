@@ -9,7 +9,7 @@ CREATE TABLE CarBay (
 	name varchar(50) PRIMARY KEY,
 	address text,
 	description text,
-	location integer REFERENCES Location(id) NOT NULL,
+	location integer REFERENCES Location(id) ON DELETE CASCADE NOT NULL, -- If Glebe gets demolished, all car bays in Glebe will not be servicable.
 	latitude decimal,
 	longitude decimal,
 	CONSTRAINT latitude_check CHECK(latitude between -90 and 90),
@@ -68,7 +68,7 @@ CREATE TABLE Car (
 	FOREIGN KEY (make, model) REFERENCES CarModel(make, model) ON UPDATE CASCADE, -- A CarModel should never be deleted when there are still cars using it
 	year integer,
 	transmission varchar(50), -- Automatic/Manual
-	parkedAt varchar(50) REFERENCES CarBay(name) ON UPDATE CASCADE NOT NULL,
+	parkedAt varchar(50) REFERENCES CarBay(name) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL, -- There should not be any cars parked in a bay that is no longer servicable.
 	CONSTRAINT regno_check CHECK(regno ~ '[A-Z0-9]{6}'), -- Checks that the registration number is in a valid format
 	CONSTRAINT transmission CHECK(transmission in ('Automatic', 'Manual'))
 );
